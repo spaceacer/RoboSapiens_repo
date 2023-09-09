@@ -1,0 +1,11 @@
+Our bot had the following specifications 
+Chassis:- White metal chassis
+Motors:- 100RPM motors
+Tyre Size:-7x4
+
+
+The motivation behind Bot design:-
+Chassis:- We chose metal chassis as it was more durable and needed fewer modifications to make it work. Due to time and labour constraints, we did not choose an acrylic as that required it to be Laser cut into shape with even more additional parts. In addition, the durability issue became painfully evident as we saw many teams break their acrylic chassis during test runs.
+Motors:- 100RPM motors provided more torque for a given power input. A lower acceleration, a heavy metal chassis, and higher torque would be best suited for climbing inclines. 
+Tyre Size: A tyre size of 7x4 helped keep the centre of mass as low as possible to prevent toppling. We also added rubber bands on the wheels to provide traction and prevent slipping.
+Position of components:- The battery was placed under the chassis to lower the Center of Mass further as the battery was quite heavy and would affect it a lot. The ESP32, motor driver, and other circuit components had their respective positions to make it easy to connect wires and additional modules (which was our primary focus) needed for different problem statements.
