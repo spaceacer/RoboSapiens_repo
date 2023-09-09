@@ -1,0 +1,20 @@
+Elec Statement:
+Include a feature in your bot that can recognize collisions
+on the front face of the bot, which should be demonstrated
+via physical signal, such as a buzzer beep or led
+illumination. You can determine the detecting range,
+however it shouldn't be greater than 5 cm. Any detection
+made over a 5 cm distance will not be rewarded. Perfect
+collision detection is also anticipated and will follow you
+five times as far as simple detection. The setup will be
+static (i.e. asking you to bring your bot towards the
+obstacle in steps) and markings will be present near the
+obstacle for measuring distances. Depending on the
+solution, more creative solutions will earn you more points. 
+
+Solution:
+Sensor module was mounted on the front side of our bot using screws.
+The module contained two HC-SR04 ultrasonic sensors fitted side-by-side facing forwards, mounted on a fret board
+this gives us a wider field of view and help in the detection and avoidance of thin object placed in front of bot
+
+A radically new solution for sensor module
