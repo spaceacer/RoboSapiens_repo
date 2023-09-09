@@ -10,16 +10,16 @@ What makes our Bot different:
   Soldering was done only for the motor wires and the sensors on the fretboard, thus reducing power consumption and waste
 
 Another innovation that was made during the project was the parabolic reflector sensor module
-This module contains one HC-SR04 ultrasonic sensor, a parabolic plane reflector, a hyperbolic plane reflector; arranged in a Cassegrain telescope configuration as seen in the figure
+This module contains one HC-SR04 ultrasonic sensor, a parabolic plane reflector and a hyperbolic plane reflector; arranged in a Cassegrain telescope configuration as seen in the figure
 
 Bot components:
   White metal chassis,
   4 motors (100 rpm) along with nuts to fit,
   4 wheels,
   1 L298N motor driver,
-  1 breadboard (medium sized),
+  1 breadboard (medium-sized),
   esp32,
-  connecting wires (MM,MF,FF),
+  connecting wires (MM, MF, FF),
   2 HC-SR04 ultrasonic sensors,
   Soldering kit,
   wire cutter
