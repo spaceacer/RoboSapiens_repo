@@ -1,0 +1,8 @@
+For the MRT electrical statement, we use the same sensor as that of AUV electrical statements. The difference is only in code.
+In the code for this statement, along with the detection of distance and all the functionality of the AUV electrical code,
+an additional condition checks if the distance is below a certain threshold (<8cm in this case).
+
+The bot performs a series of commands if the distance ever falls below the threshold.
+First, it stops. After a delay, it indicates using its buzzer+led that an obstacle was detected. 
+Next, it starts to reverse and move away from the obstacle for a set amount of time, overwriting any controller commands supplied by the user. 
+Once the reversing period is over, control is handed back to the user, and regular operations can proceed.
