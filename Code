@@ -1,0 +1,317 @@
+#include <WiFi.h>
+#include <esp_now.h>
+int con=0;
+//My stuff
+const int S_echo1 = 34;
+const int S_echo2 = 35;
+const int S_trig1 = 5;
+const int S_trig2 = 22;
+double prev_speed = 30;
+// I removed this cause not enough pins.
+
+double time1=0;
+double time2=1000;
+double timer=0;
+
+double distance;
+double prev_distance;
+
+
+// My stuff ends
+
+// Define a structure to hold IMU (Inertial Measurement Unit) data
+typedef struct {
+  float gx, gy, gz;
+} IMUData;
+
+IMUData myMessage; // Create a variable to store received IMU data
+int cmd = 0;       // Initialize motor control command variable
+int spd = 0;       // Initialize motor speed variable
+
+// Function to handle received data from another device
+void onDataReceiver(const uint8_t* mac, const uint8_t* incomingData, int len) {
+  // Serial.println("Message received.");
+  // Copy the received data into the myMessage variable
+  memcpy(&myMessage, incomingData, sizeof(myMessage));
+  /*
+  // Display received data
+  Serial.println("=== Data ===");
+  Serial.print("Mac address: ");
+  for (int i = 0; i < 6; i++) {
+    Serial.print(mac[i], HEX);  // Display MAC address
+    if (i < 5) Serial.print(":");
+  }
+  
+  Serial.println();
+  Serial.print("gx: ");
+  Serial.print(myMessage.gx);    // Display x-axis gyro value
+  Serial.print(", gy: ");
+  Serial.print(myMessage.gy);    // Display y-axis gyro value
+  Serial.print(", gz: ");
+  Serial.println(myMessage.gz);   // Display z-axis gyro value
+}
+*/
+}
+// Function to update motor control based on received IMU data
+void updateMotorControl() {
+  float gx = myMessage.gx;
+  float gy = myMessage.gy;
+  float gz = myMessage.gz;
+
+  // Motor control logic based on IMU data
+  if ((gz != 0) && (gx != 0) && (abs(gy) < 2)) {
+    spd = constrain(abs(map((atan2(gx, gz) * 180 / PI), 0, 90, 0, 255)), 0, 255);
+    cmd = (gx > 0) ? 1 : 2; // Forward or backward
+  } else if ((gz != 0) && (gy != 0) && (abs(gx) < 2)) {
+    spd = constrain(abs(map((atan2(gy, gz) * 180 / PI), 0, 90, 0, 255)), 0, 255);
+    cmd = (gy > 0) ? 3 : 4; // Right or left
+  } else {
+    cmd = 0; // Stop
+    spd = 0;
+  }
+
+  // Adjust motor speed thresholds
+  if(spd<=40 && cmd!=3 && cmd!=4) spd=0; //Experimental
+  // if(spd<=40) spd=0;
+  if(spd>40 && spd<255 && cmd!=3 &&cmd!=4) spd=2*(spd-40);
+  if(spd>=255) spd=255;
+
+  // /*Experimental Features:
+  // if(cmd==3 || cmd ==4) spd=spd/2;
+  if(spd-prev_speed >30) spd=prev_speed+30;
+  if(spd-prev_speed <-30) spd=prev_speed-30;
+  prev_speed=spd;
+  // if(cmd==3 || cmd ==4) spd=spd/2;
+  // */
+
+  // Display motor control information
+  Serial.print("cmd: ");
+  Serial.print(cmd);   // Display motor command
+  Serial.print(", speed: ");
+  Serial.println(spd); // Display motor speed
+}
+// Pin assignments for motor control
+// These pins are the Enable pins of the L298N motor driver which connects to esp32 gpio pins to implement the PWM function
+
+const int ENA = 13;  // choose the GPIO pin of esp32;
+const int ENB = 25;  // choose the GPIO pin of esp32;
+
+// These pins are the input pins of l298N on the left side
+const int IN1 = 12;  // Choose your GPIO pin of esp32 for the input 1
+const int IN2 = 14;  // Choose your GPIO pin of esp32 for the input 2
+
+// These pins are the input pins of l298N on the right side
+const int IN3 = 27;  // Choose your GPIO pin of esp32 for the input 3
+const int IN4 = 26;  // Choose your GPIO pin of esp32 for the input 4
+
+// Setup function
+void setup() {
+  Serial.begin(9600);
+  WiFi.mode(WIFI_STA);
+
+  Serial.println("Setup started");
+
+  // Configure motor control pins as outputs
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);    //fill in the blanks 
+  pinMode(IN2, OUTPUT);
+  pinMode(ENB, OUTPUT);    //fill in the blanks   
+  pinMode(IN3, OUTPUT);    //fill in the blanks 
+  pinMode(IN4, OUTPUT);
+
+  Serial.print("Mac Address: ");
+  Serial.print(WiFi.macAddress());
+  Serial.println(" ESP32 ESP-Now Broadcast");
+
+  // Initialize ESP-NOW communication
+  if (esp_now_init() != 0) {
+    Serial.println("Problem during ESP-NOW init");
+    return;
+  }
+
+  // Register the data receiver callback function
+  esp_now_register_recv_cb(onDataReceiver);
+  // My stuff starts
+  pinMode(S_trig1, OUTPUT); //Connect this one to Trig pin of sensor
+  pinMode(S_echo1, INPUT);  //Connect this one to Echo pin of sesnor
+  pinMode(S_trig2, OUTPUT);
+  pinMode(S_echo2, INPUT);
+  Serial.begin(9600);
+  // prev_distance=distance;
+  digitalWrite(S_trig1, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(S_trig1,LOW);
+  time1 = pulseIn(S_echo1, HIGH)/2;
+  // Serial.print("time1: ");
+  // Serial.println(time1);
+  // /* 
+  //Unlock this part when using two sensors. Hopefully shit works.
+  digitalWrite(S_trig2, HIGH); //Trig of sensor2
+  delayMicroseconds(10);
+  digitalWrite(S_trig2,LOW); //Echo of sensor3
+  time2 = pulseIn(S_echo2, HIGH)/2;
+  // */
+  if (time2<=time1) timer=time2;
+  if (time1<=time2) timer=time1;
+  distance=timer*0.0355;
+  pinMode(18, OUTPUT);
+  pinMode(19, OUTPUT);
+  pinMode(21, OUTPUT);
+  //My stuff ends
+}
+
+void sensors_do() {
+  prev_distance=distance;
+  digitalWrite(S_trig1, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(S_trig1,LOW);
+  time1 = pulseIn(S_echo1, HIGH)/2;
+  delay(25);
+  // Serial.print("time1: ");
+  // Serial.println(time1);
+  // /*
+  digitalWrite(S_trig2, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(S_trig2,LOW);
+  time2 = pulseIn(S_echo2, HIGH)/2;
+  // */
+  /*
+  Serial.print("time1: ");
+  Serial.println(time1);
+  Serial.print("time2: ");
+  Serial.println(time2);
+  */
+  if (time2<=time1) timer=time2;
+  if (time1<=time2) timer=time1;
+  distance=timer * 0.0355;
+  delay(25);
+  if (distance-prev_distance>=5) distance= prev_distance+5;
+  if (distance-prev_distance<=-5) distance= prev_distance-5;
+
+  Serial.println(distance);
+  // Serial.println("WHat");
+  if(distance<4.5){
+    digitalWrite(18, HIGH);
+    con=1;
+  }
+  if(distance>4.5){
+    digitalWrite(18, LOW);
+    con=0;
+  }
+  if(distance<10){
+    digitalWrite(19, HIGH);
+  }
+  if(distance>10){
+    digitalWrite(19, LOW);
+  }
+  if(distance<15){
+    digitalWrite(21, HIGH);
+    
+  }
+  if(distance>15){
+    digitalWrite(21, LOW);
+  }
+}
+// Function to apply motor control based on command and speed
+void applyMotorControl() {
+  switch (cmd) {
+
+    // You have to develop the logic that, when the IMU is tilted front to go forward, Then the esp32 executes the following commands
+    // Refer to get electrified slides for more help
+    case 1:  // Forward
+      //Mine
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+      break;
+
+
+/*
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, HIGH);
+      digitalWrite(IN4, LOW);
+  */
+      break;
+    case 2:  // Backward
+      //mine
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, HIGH);
+      digitalWrite(IN3, HIGH);
+      digitalWrite(IN4, LOW);
+      break;
+
+
+
+
+      /*
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, HIGH);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+      break;
+      */
+    case 3:  // Right
+
+    //Mine
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, HIGH);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+      // break;
+
+/*
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, HIGH);
+      digitalWrite(IN3, HIGH);
+      digitalWrite(IN4, LOW);
+
+*/
+      
+      break;
+    case 4:  // Left
+
+    //Mine
+    
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, HIGH);
+      digitalWrite(IN4, LOW);
+    /*
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+    */
+      break;
+    default:  // Stop
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, LOW);
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, LOW);
+      spd = 0;
+      break;
+  }
+
+  // Apply the calculated motor speed to both motors
+  // fill in the blanks to finalize the code
+  analogWrite(ENA, spd);
+  analogWrite(ENB, spd);
+}
+
+// Main loop
+void loop() {
+  // Continuously update and apply motor control
+  updateMotorControl();
+  applyMotorControl();
+  sensors_do();
+  if(con==0){
+  digitalWrite(18, HIGH);
+  delay(10);
+  digitalWrite(18,LOW);
+  delay(10);
+  }
+
+  // delay(50); // Delay to control loop speedu
+}
