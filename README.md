@@ -21,3 +21,5 @@ Unfortunately, the performance fell slightly short of what we needed due to time
 
 Bot components: White metal chassis, four motors (100 rpm) along with nuts to fit, four wheels, one L298N motor driver, one breadboard (medium-sized), esp32, connecting wires (MM, MF, FF), 2 HC-SR04 ultrasonic sensors, soldering kit, wire cutter nuts and bolts (that fit metal chassis holes)
 Procedure: Assemble the bot according to the image
+
+The main reason we focused on modularity is due to the metal chassis. The members of the team were quite busy over the weekend and the week, so we could not afford to meet all the time and work on the project. Thus, we chose a metal chassis as it requires minimal effort to get running. However, the disadvantage of the metal chassis is the lack of customisability. This was why we did not take part in the MRT mech statement, as that required a lot of additional features to add to the chassis themselves. In order to counter the lack of customizability, we chose modularity. This allowed us to add many more features while keeping the base chassis structure unchanged.
