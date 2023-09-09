@@ -2,6 +2,7 @@
 
 
 What makes our Bot different:
+
   The basic concept behind our bot is 'modularity'. Modularity means the degree to which parts can be interchanged and replaced easily
   We used breadboard instead of fretboard to mount the esp32 and the motor driver
   We had a separate detachable sensor module 
