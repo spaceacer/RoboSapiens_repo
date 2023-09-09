@@ -1,0 +1,19 @@
+Mech Statement:
+Add a feature to your RC robot that enables you to roll a ball up an inclined
+plane at an angle of 35 degrees while attempting to avoid the ball rolling
+sideways. There are three marks on the plane, each spaced 15 cm apart, and
+the width of each successive section of the incline decreases by 5 cm. You
+will score 10 points for passing the first mark, 30 points for passing the
+second, and 70 points for passing the final mark.
+Fig 1 : Inclined Plane
+Keep in mind that you won't receive any points for rolling the ball over without
+passing any checkpoints, and that each checkpoint adds the aforementioned
+score separately.
+
+
+Our Solution:
+Due to our Bot's modularity, two cardboard pieces are attached at the front on both sides using metal pieces from Mechanix kit using nut and bolt
+This ensures that the ball doesnt roll sideways while climbing
+here the front side is the flat side of metal white chassis
+the bot had enough height so that the ball couldnt topple over it while climbing
+Due to less rpm and more torque of the motors the bot can easily climb the incline and is easily controllable
